@@ -1,0 +1,61 @@
+name: Release
+
+# Build unsigned desktop artifacts on a version tag and attach them to the
+# GitHub Release. Cross-platform matrix — each runner packages its own OS.
+# Manual dispatch is available for dry runs (no publish).
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write # create/update the Release and upload assets
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            platform: mac
+          - os: ubuntu-latest
+            platform: linux
+          - os: windows-latest
+            platform: win
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4 # version read from package.json "packageManager"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build renderer/main/preload
+        run: pnpm build
+
+      # Publish only on a real tag push; workflow_dispatch is a build-only dry run.
+      - name: Package (electron-builder)
+        run: pnpm exec electron-builder --${{ matrix.platform }} --publish ${{ github.ref_type == 'tag' && 'always' || 'never' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts (dry-run inspection)
+        if: github.ref_type != 'tag'
+        uses: actions/upload-artifact@v4
+        with:
+          name: clu-${{ matrix.platform }}
+          path: |
+            release/*.zip
+            release/*.AppImage
+            release/*.exe
+          if-no-files-found: ignore

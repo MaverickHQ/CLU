@@ -1,0 +1,991 @@
+/* ═══════════════════════════════════════════════════════════════
+   CLU Design System — ported from docs/mockups/_shared.css (locked
+   at Phase 1.2). Three themes switched via [data-theme] on <html>.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --text-3xl: 34px;
+
+  --font-ui: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Helvetica Neue', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Menlo', 'Consolas', monospace;
+
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.32);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+
+  --t-fast: 100ms ease;
+  --t-base: 150ms ease;
+}
+
+/* ─── Theme 1: Kiro Dark (default) ─── */
+:root,
+[data-theme='kiro-dark'] {
+  --bg-base: #1a1b26;
+  --bg-elevated: #24263a;
+  --bg-overlay: #2a2c40;
+  --bg-hover: #2f3149;
+  --bg-active: #364060;
+  --bg-selected: rgba(0, 212, 170, 0.18);
+
+  --border: #3a3c54;
+  --border-strong: #4a4c64;
+
+  --text-primary: #c0caf5;
+  --text-secondary: #9aa5ce;
+  --text-muted: #565f89;
+  --text-faint: #3a3c54;
+  --text-inverse: #1a1b26;
+
+  --accent: #00d4aa;
+  --accent-hover: #00b896;
+  --accent-dim: rgba(0, 212, 170, 0.15);
+
+  --warn: #f3c41f;
+  --error: #f87171;
+  --info: #75beff;
+  --success: #73c991;
+
+  --titlebar-bg: #16171f;
+  --tabstrip-bg: #1f2030;
+  --tab-active: #1a1b26;
+  --tab-inactive: #1f2030;
+
+  --statusbar-bg: #00d4aa;
+  --statusbar-text: #1a1b26;
+
+  --code-bg: #161721;
+  --code-text: #c0caf5;
+  --syntax-kw: #bb9af7;
+  --syntax-fn: #7aa2f7;
+  --syntax-str: #9ece6a;
+  --syntax-cmt: #565f89;
+  --syntax-typ: #2ac3de;
+
+  --git-modified: #e0af68;
+  --git-added: #9ece6a;
+  --git-untracked: #565f89;
+  --git-deleted: #f7768e;
+}
+
+/* ─── Theme 2: Tomorrow Night Blue ─── */
+[data-theme='tomorrow-night-blue'] {
+  --bg-base: #002451;
+  --bg-elevated: #00346e;
+  --bg-overlay: #003f8e;
+  --bg-hover: #0d4080;
+  --bg-active: #1a5096;
+  --bg-selected: rgba(153, 255, 255, 0.18);
+
+  --border: #0e5a9e;
+  --border-strong: #1e6eb0;
+
+  --text-primary: #ffffff;
+  --text-secondary: #bbdaff;
+  --text-muted: #7285b7;
+  --text-faint: #4a5a8f;
+  --text-inverse: #002451;
+
+  --accent: #99ffff;
+  --accent-hover: #66e0e0;
+  --accent-dim: rgba(153, 255, 255, 0.15);
+
+  --warn: #ffeead;
+  --error: #ff9da4;
+  --info: #bbdaff;
+  --success: #d1f1a9;
+
+  --titlebar-bg: #001a3f;
+  --tabstrip-bg: #00285c;
+  --tab-active: #002451;
+  --tab-inactive: #00285c;
+
+  --statusbar-bg: #99ffff;
+  --statusbar-text: #002451;
+
+  --code-bg: #001a3f;
+  --code-text: #ffffff;
+  --syntax-kw: #ebbbff;
+  --syntax-fn: #bbdaff;
+  --syntax-str: #d1f1a9;
+  --syntax-cmt: #7285b7;
+  --syntax-typ: #99ffff;
+
+  --git-modified: #ffeead;
+  --git-added: #d1f1a9;
+  --git-untracked: #7285b7;
+  --git-deleted: #ff9da4;
+}
+
+/* ─── Theme 3: Solarized Light ─── */
+[data-theme='solarized-light'] {
+  --bg-base: #fdf6e3;
+  --bg-elevated: #eee8d5;
+  --bg-overlay: #ffffff;
+  --bg-hover: #e4dec1;
+  --bg-active: #d7d0a8;
+  --bg-selected: rgba(38, 139, 210, 0.15);
+
+  --border: #d3cbb7;
+  --border-strong: #93a1a1;
+
+  --text-primary: #002b36;
+  --text-secondary: #073642;
+  --text-muted: #93a1a1;
+  --text-faint: #d3cbb7;
+  --text-inverse: #fdf6e3;
+
+  --accent: #268bd2;
+  --accent-hover: #1c6aa5;
+  --accent-dim: rgba(38, 139, 210, 0.15);
+
+  --warn: #b58900;
+  --error: #dc322f;
+  --info: #2aa198;
+  --success: #859900;
+
+  --titlebar-bg: #eee8d5;
+  --tabstrip-bg: #e9e2cf;
+  --tab-active: #fdf6e3;
+  --tab-inactive: #e9e2cf;
+
+  --statusbar-bg: #268bd2;
+  --statusbar-text: #fdf6e3;
+
+  --code-bg: #eee8d5;
+  --code-text: #073642;
+  --syntax-kw: #859900;
+  --syntax-fn: #b58900;
+  --syntax-str: #2aa198;
+  --syntax-cmt: #93a1a1;
+  --syntax-typ: #cb4b16;
+
+  --git-modified: #b58900;
+  --git-added: #859900;
+  --git-untracked: #93a1a1;
+  --git-deleted: #dc322f;
+}
+
+/* ─── base ─── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+.icon-xs {
+  width: 12px;
+  height: 12px;
+}
+.icon-sm {
+  width: 14px;
+  height: 14px;
+}
+
+/* ─── cockpit shell ─── */
+.cockpit {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.tab-strip {
+  height: 38px;
+  background: var(--tabstrip-bg);
+  display: flex;
+  align-items: stretch;
+  padding-left: var(--space-1);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  -webkit-app-region: drag; /* hiddenInset title bar: strip doubles as drag area */
+  padding-top: 6px;
+}
+
+/* macOS: inset the strip so the first tab clears the traffic-light window
+   controls (top-left) instead of sitting under them. */
+:root[data-platform='darwin'] .tab-strip {
+  padding-left: 78px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-3);
+  max-width: 220px;
+  background: var(--tab-inactive);
+  border-right: 1px solid var(--border);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  gap: var(--space-2);
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-ui);
+  -webkit-app-region: no-drag;
+}
+.tab.active {
+  background: var(--tab-active);
+  color: var(--text-primary);
+}
+.tab .close {
+  opacity: 0.4;
+  padding: 2px;
+  border-radius: 3px;
+  display: inline-flex;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+.tab.active .close {
+  opacity: 0.8;
+}
+.tab .close:hover {
+  opacity: 1;
+  background: var(--bg-hover);
+}
+.tab-new {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-3);
+  color: var(--text-muted);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  -webkit-app-region: no-drag;
+}
+.tab-new:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.main-area {
+  flex: 1;
+  min-height: 0;
+}
+
+.pane {
+  height: 100%;
+  overflow: auto;
+}
+.pane-tree {
+  background: var(--bg-elevated);
+}
+.pane-viewer {
+  background: var(--bg-base);
+}
+.pane-terminal {
+  background: var(--code-bg);
+  border-top: 1px solid var(--border);
+}
+
+.pane-placeholder {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+[data-group] {
+  height: 100%;
+  width: 100%;
+}
+
+.resize-handle {
+  background: var(--border);
+  transition: background var(--t-base);
+}
+.resize-handle:hover,
+.resize-handle[data-state='drag'] {
+  background: var(--accent);
+}
+.resize-handle-v {
+  width: 1px;
+}
+.resize-handle-h {
+  height: 1px;
+}
+
+/* ─── viewer ─── */
+.viewer-pane {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.viewer-header {
+  background: var(--bg-elevated);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.viewer-header .filename {
+  font-weight: 600;
+}
+.viewer-header .path {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.viewer-body {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+.viewer-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+  text-align: center;
+  padding: var(--space-8);
+}
+.viewer-empty .empty-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--text-faint);
+}
+.viewer-empty .title {
+  font-size: var(--text-md);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.viewer-empty .hint {
+  font-size: var(--text-base);
+  max-width: 380px;
+  line-height: 1.6;
+}
+.viewer-empty .hint code {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  background: var(--code-bg);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.markdown-body {
+  padding: var(--space-6) var(--space-8);
+  font-size: var(--text-md);
+  line-height: 1.65;
+  color: var(--text-secondary);
+  max-width: 860px;
+}
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+  color: var(--text-primary);
+  margin: var(--space-4) 0 var(--space-2);
+}
+.markdown-body h2 {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--space-1);
+}
+.markdown-body p,
+.markdown-body ul,
+.markdown-body ol {
+  margin-bottom: var(--space-3);
+}
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: var(--space-5);
+}
+.markdown-body code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--code-bg);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--accent);
+}
+.markdown-body pre {
+  background: var(--code-bg);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  overflow-x: auto;
+  margin-bottom: var(--space-3);
+}
+.markdown-body pre code {
+  background: none;
+  padding: 0;
+  color: var(--code-text);
+}
+.markdown-body table {
+  border-collapse: collapse;
+  margin-bottom: var(--space-3);
+}
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid var(--border);
+  padding: var(--space-1) var(--space-3);
+}
+.markdown-body th {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+.code-body pre,
+.code-body .shiki {
+  padding: var(--space-4) var(--space-5) !important;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  background: transparent !important;
+}
+.plain-body {
+  padding: var(--space-4) var(--space-5);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--code-text);
+  white-space: pre-wrap;
+}
+
+/* ─── pinned section (PinSet) ─── */
+.pinned-section {
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-2) 0;
+}
+.pinned-title {
+  padding: 0 var(--space-3) var(--space-1);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.pinned-title .count {
+  color: var(--accent);
+  font-weight: 700;
+}
+.pinned-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2) 2px var(--space-3);
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.pinned-row:hover {
+  background: var(--bg-hover);
+}
+.pinned-row.stale .name {
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+.pinned-row .name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pinned-row .stale-mark {
+  color: var(--error);
+  font-size: var(--text-xs);
+}
+.pinned-row .unpin {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0 4px;
+  font-size: var(--text-sm);
+}
+.pinned-row .unpin:hover {
+  color: var(--text-primary);
+}
+.pin-dot {
+  color: var(--accent);
+}
+.pin-dot.stale {
+  color: var(--error);
+}
+
+/* ─── file tree ─── */
+.tree-pane {
+  height: 100%;
+  outline: none;
+  padding: var(--space-2) 0;
+}
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-2);
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tree-row:hover {
+  background: var(--bg-hover);
+}
+.tree-row.selected {
+  background: var(--bg-selected);
+  color: var(--text-primary);
+}
+.tree-row .chevron {
+  width: 14px;
+  flex-shrink: 0;
+  display: inline-flex;
+  color: var(--text-muted);
+}
+.tree-row .ico-dir {
+  color: var(--info);
+}
+.tree-row .ico-file {
+  color: var(--text-muted);
+}
+.tree-row .name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tree-row .git-status {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  padding-right: var(--space-1);
+}
+.tree-row .git-M {
+  color: var(--git-modified);
+}
+.tree-row .git-A {
+  color: var(--git-added);
+}
+.tree-row .git-untracked {
+  color: var(--git-untracked);
+}
+
+/* ─── terminal ─── */
+.terminal-view {
+  position: relative;
+  padding: var(--space-2);
+}
+.shell-exited-overlay {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--code-bg) 88%, transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  color: var(--text-secondary);
+}
+.shell-exited-overlay .icon {
+  width: 28px;
+  height: 28px;
+  color: var(--error);
+}
+.shell-exited-overlay .title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.shell-exited-overlay .actions {
+  display: flex;
+  gap: var(--space-2);
+}
+.shell-exited-overlay button {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  padding: 6px var(--space-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+.shell-exited-overlay .btn-restart {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-inverse);
+}
+
+/* ─── modals (close-confirm mockup) ─── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.modal {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  min-width: 380px;
+  max-width: 480px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.modal .severity-bar {
+  height: 3px;
+  background: var(--warn);
+}
+.modal-inner {
+  padding: var(--space-5) var(--space-6);
+}
+.modal-title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.modal-title .icon-warn {
+  color: var(--warn);
+  width: 18px;
+  height: 18px;
+}
+.modal-body {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: var(--space-4);
+}
+.modal-body ul {
+  margin: var(--space-2) 0 var(--space-2) var(--space-5);
+}
+.modal-body strong {
+  color: var(--text-primary);
+}
+.modal-actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  align-items: center;
+}
+.modal-actions .pref {
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.modal-actions button {
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  padding: 7px var(--space-4);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.modal-actions .btn-cancel {
+  background: var(--bg-overlay);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.modal-actions .btn-danger {
+  background: var(--error);
+  border: 1px solid var(--error);
+  color: #fff;
+}
+
+/* ─── missing project (error-state A) ─── */
+.missing-project {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  color: var(--text-secondary);
+  text-align: center;
+  padding: var(--space-8);
+}
+.missing-project .icon {
+  width: 32px;
+  height: 32px;
+  color: var(--warn);
+}
+.missing-project .title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.missing-project .hint code {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--accent);
+  background: var(--code-bg);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.missing-project button {
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  padding: 7px var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--bg-overlay);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+/* ─── welcome (welcome-pane mockup) ─── */
+.welcome {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+}
+.welcome-card {
+  width: 460px;
+  text-align: center;
+  color: var(--text-muted);
+}
+.welcome-card h1 {
+  font-size: 38px;
+  font-weight: 200;
+  color: var(--text-primary);
+  letter-spacing: -1.5px;
+}
+.welcome-card .tagline {
+  font-size: var(--text-md);
+  margin: var(--space-1) 0 var(--space-6);
+}
+.drop-zone {
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  margin-bottom: var(--space-5);
+  background: linear-gradient(180deg, var(--accent-dim) 0%, transparent 100%);
+  transition: var(--t-base);
+}
+.drop-zone:hover {
+  border-color: var(--accent);
+}
+.drop-zone .text {
+  font-size: var(--text-md);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.drop-zone .sub {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: var(--space-2) 0 var(--space-3);
+}
+.btn-open {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  font-weight: 500;
+  padding: 9px var(--space-5);
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--text-inverse);
+  border: 1px solid var(--accent);
+  cursor: pointer;
+  transition: var(--t-base);
+}
+.btn-open:hover {
+  background: var(--accent-hover);
+}
+.recent-section {
+  text-align: left;
+  margin-bottom: var(--space-4);
+}
+.recent-title {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+  padding-left: var(--space-2);
+}
+.recent-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.recent-row:hover {
+  background: var(--bg-hover);
+  border-color: var(--border);
+}
+.recent-row .icon {
+  color: var(--info);
+}
+.recent-row .name {
+  flex: 1;
+  font-weight: 500;
+}
+.recent-row .path {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+.recent-row.missing-row .name {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+.recent-row .missing-chip {
+  color: var(--error);
+  font-size: var(--text-xs);
+  padding: 2px 8px;
+  background: color-mix(in srgb, var(--error) 14%, transparent);
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.recent-row .remove {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: var(--text-md);
+}
+.recent-empty {
+  padding: var(--space-3);
+  font-size: var(--text-sm);
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  font-style: italic;
+}
+.welcome-footer {
+  font-size: var(--text-xs);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+.welcome-footer code {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  background: var(--code-bg);
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+
+/* ─── gitignore toast (gitignore-prompt mockup) ─── */
+.gitignore-toast {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-6);
+  width: 400px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--info);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-md);
+  z-index: 90;
+}
+.gitignore-toast .toast-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+.gitignore-toast .toast-body {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: var(--space-3);
+}
+.gitignore-toast .toast-body code {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  background: var(--code-bg);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.gitignore-toast .toast-actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+.gitignore-toast button {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  padding: 5px var(--space-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.gitignore-toast .btn-ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+}
+.gitignore-toast .btn-plain {
+  background: var(--bg-overlay);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.gitignore-toast .btn-primary {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: var(--text-inverse);
+}

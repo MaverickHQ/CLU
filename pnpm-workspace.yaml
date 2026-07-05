@@ -1,0 +1,13 @@
+# Native modules must run their build/postinstall scripts (they download or
+# compile binaries). Everything else's lifecycle scripts are skipped.
+allowBuilds:
+  # electron-winstaller is pulled in by electron-builder but only used for
+  # Squirrel/NSIS installers — we ship the portable Windows target, so its
+  # build script is intentionally not run.
+  electron-winstaller: false
+  esbuild: true
+  node-pty: true
+onlyBuiltDependencies:
+  - electron
+  - esbuild
+  - node-pty

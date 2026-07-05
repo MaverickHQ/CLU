@@ -1,0 +1,43 @@
+# electron-builder config — UNSIGNED, best-effort distribution (no Apple
+# Developer Program, no notarization, no Mac App Store). Artifacts attach to
+# the GitHub Release on a `v*` tag push.
+appId: net.maverickstudios.clu
+productName: CLU
+copyright: © MaverickHQ
+
+directories:
+  output: release
+  buildResources: build # optional icons live here (build/icon.png etc.)
+
+# electron-vite emits to out/; ship that plus the manifest. Production
+# node_modules (node-pty and friends) are bundled by electron-builder.
+files:
+  - out/**/*
+  - package.json
+
+# node-pty is a native module with a prebuilt spawn-helper binary that must stay
+# executable on disk — it cannot run from inside the asar archive, so unpack it.
+asarUnpack:
+  - '**/node_modules/node-pty/**'
+
+# Auto-update (electron-updater) reads published artifacts from GitHub Releases;
+# works for unsigned builds.
+publish:
+  provider: github
+  owner: MaverickHQ
+  repo: CLU
+
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - zip # unsigned zip; macOS install uses the xattr quarantine one-liner
+  identity: null # explicitly unsigned — never prompt for a signing identity
+
+linux:
+  category: Development
+  target:
+    - AppImage
+
+win:
+  target:
+    - portable # single self-contained .exe, no installer
