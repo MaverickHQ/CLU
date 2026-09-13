@@ -122,3 +122,17 @@ export function commit(state: CommitState, detection: AgentDetection): CommitSta
   if (count >= DEESCALATE_SAMPLES) return { committed: next, pending: null, pendingCount: 0 }
   return { committed: state.committed, pending: next, pendingCount: count }
 }
+
+/**
+ * Whether a state change should raise a "needs you" OS notification: only on a
+ * *transition into* blocked, and only for a **background** (inactive) Tab — the
+ * active Tab's terminal is already on screen, and repeat-blocked samples must
+ * not re-notify.
+ */
+export function shouldNotifyBlocked(
+  prev: AgentState | undefined,
+  next: AgentState,
+  isActive: boolean,
+): boolean {
+  return next === 'blocked' && prev !== 'blocked' && !isActive
+}

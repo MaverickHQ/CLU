@@ -75,6 +75,11 @@ export interface Host {
   /** Renderer approves the quit after flushing state. */
   confirmQuit?(): void
 
+  // --- OS notification (R2.1 / ADR-0011; Electron-only, fire-and-forget)
+  /** Raise a desktop notification (e.g. a background Tab's Claude is blocked).
+   *  `tabId` lets the click focus that Tab. Optional: browser/fake may omit. */
+  notify?(opts: { title: string; body: string; tabId: TabId }): void
+
   // --- git
   /** Raw `git status --porcelain` output plus the repo→project path prefix, or
    *  null when the directory is not a git repo. Porcelain paths are

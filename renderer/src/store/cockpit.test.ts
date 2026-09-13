@@ -164,4 +164,38 @@ describe('cockpit store', () => {
     const persisted = await host.state.loadProject('/p')
     expect(persisted?.pinSet).toEqual(['/p/a.ts'])
   })
+
+  describe('(R2.1) setAgentState + background→blocked notification', () => {
+    it('updates the Tab agentState', async () => {
+      const { store } = setup()
+      const id = await store.getState().openTab('/p')
+      store.getState().setAgentState(id, 'working')
+      expect(store.getState().tabs.find((t) => t.id === id)?.agentState).toBe('working')
+    })
+
+    it('notifies when a BACKGROUND Tab becomes blocked', async () => {
+      const { host, store } = setup()
+      const a = await store.getState().openTab('/proj/a')
+      await store.getState().openTab('/proj/b') // b is now active, a is background
+      store.getState().setAgentState(a, 'blocked')
+      expect(host.fake.notifies).toHaveLength(1)
+      expect(host.fake.notifies[0]).toMatchObject({ tabId: a, body: 'a' })
+    })
+
+    it('does NOT notify for the active Tab (its terminal is on screen)', async () => {
+      const { host, store } = setup()
+      const a = await store.getState().openTab('/proj/a') // a is active
+      store.getState().setAgentState(a, 'blocked')
+      expect(host.fake.notifies).toHaveLength(0)
+    })
+
+    it('does NOT re-notify while a background Tab stays blocked', async () => {
+      const { host, store } = setup()
+      const a = await store.getState().openTab('/proj/a')
+      await store.getState().openTab('/proj/b')
+      store.getState().setAgentState(a, 'blocked')
+      store.getState().setAgentState(a, 'blocked') // repeat sample
+      expect(host.fake.notifies).toHaveLength(1)
+    })
+  })
 })

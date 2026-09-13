@@ -10,6 +10,8 @@ import { createStore, type StoreApi } from 'zustand/vanilla'
 import type { Host } from '@shared/host'
 import type { HiddenMode, ProjectState, SplitLayout, TabId, ThemeName } from '@shared/types'
 import { cycleHiddenMode, defaultAppState, defaultProjectState, SCHEMA_VERSION } from '@shared/types'
+import type { AgentState } from '@shared/agentStatus/types'
+import { shouldNotifyBlocked } from '@shared/agentStatus/detect'
 import { basename } from '@shared/paths'
 
 export const SAVE_DEBOUNCE_MS = 200
@@ -33,6 +35,8 @@ export interface TabRuntime {
   /** Runtime-only: pinned paths currently missing on disk (ADR-0005 — stale
    *  pins stay visible and exported until explicitly unpinned). */
   stalePins?: string[]
+  /** Runtime-only: detected Claude session state (R2.1 / ADR-0011). */
+  agentState?: AgentState
 }
 
 /** A close/quit awaiting user confirmation (close-confirm mockup). */
@@ -71,6 +75,8 @@ export interface CockpitState {
 
   /** Runtime-only shell status (set by terminal wiring; never persisted). */
   markShellExited(id: TabId): void
+  /** Set a Tab's detected Claude state; notifies on a background→blocked transition (R2.1). */
+  setAgentState(id: TabId, state: AgentState): void
   clearShellExited(id: TabId): void
 
   /** Close-confirm flow (ADR-0004 + close-confirm mockup). The caller supplies
@@ -372,6 +378,18 @@ export function createCockpitStore(deps: { host: Host }): StoreApi<CockpitState>
       markShellExited(id: TabId): void {
         // Runtime flag only — bypass updateTab so no persistence is scheduled.
         set({ tabs: get().tabs.map((t) => (t.id === id ? { ...t, shellExited: true } : t)) })
+      },
+
+      setAgentState(id: TabId, state: AgentState): void {
+        const { tabs, activeTabId } = get()
+        const tab = tabs.find((t) => t.id === id)
+        if (!tab || tab.agentState === state) return
+        // Notify BEFORE committing, so we compare against the previous state.
+        if (shouldNotifyBlocked(tab.agentState, state, id === activeTabId)) {
+          host.notify?.({ title: 'Claude needs you', body: tab.name, tabId: id })
+        }
+        // Runtime-only — bypass updateTab so no persistence is scheduled.
+        set({ tabs: get().tabs.map((t) => (t.id === id ? { ...t, agentState: state } : t)) })
       },
 
       clearShellExited(id: TabId): void {

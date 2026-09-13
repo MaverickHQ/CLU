@@ -9,6 +9,7 @@ import {
   classify,
   commit,
   initialCommitState,
+  shouldNotifyBlocked,
   type CommitState,
 } from './detect'
 import type { AgentDetection, DetectSample } from './types'
@@ -137,5 +138,19 @@ describe('commit — hysteresis', () => {
       skipStateUpdate: true,
     })
     expect(held.committed).toBe('working')
+  })
+})
+
+describe('shouldNotifyBlocked', () => {
+  it('fires only on a transition into blocked for a background Tab', () => {
+    expect(shouldNotifyBlocked('working', 'blocked', false)).toBe(true)
+    expect(shouldNotifyBlocked(undefined, 'blocked', false)).toBe(true)
+  })
+  it('does not fire for the active Tab', () => {
+    expect(shouldNotifyBlocked('working', 'blocked', true)).toBe(false)
+  })
+  it('does not re-fire while already blocked, or for non-blocked states', () => {
+    expect(shouldNotifyBlocked('blocked', 'blocked', false)).toBe(false)
+    expect(shouldNotifyBlocked('working', 'idle', false)).toBe(false)
   })
 })

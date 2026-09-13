@@ -44,6 +44,8 @@ export interface FakeHost extends Host {
     emitQuitRequest(): void
     /** confirmQuit() calls, for asserting the quit handshake. */
     quitConfirms: number[]
+    /** notify() calls, for asserting background→blocked notifications (R2.1). */
+    notifies: Array<{ title: string; body: string; tabId: TabId }>
   }
 }
 
@@ -58,6 +60,7 @@ export function createFakeHost(): FakeHost {
   const oversize = new Map<string, number>() // path → reported size, forces tooLarge
   const quitSubs = new Set<() => void>()
   const quitConfirms: number[] = []
+  const notifies: Array<{ title: string; body: string; tabId: TabId }> = []
   const spawns: SpawnPtyOptions[] = []
   const writes: Array<{ id: TabId; data: string }> = []
   const kills: TabId[] = []
@@ -140,6 +143,9 @@ export function createFakeHost(): FakeHost {
     confirmQuit() {
       quitConfirms.push(Date.now())
     },
+    notify(opts) {
+      notifies.push(opts)
+    },
 
     async gitStatus(projectPath) {
       return gitStatuses.get(projectPath) ?? null
@@ -213,6 +219,7 @@ export function createFakeHost(): FakeHost {
       setOversize: (absPath, sizeBytes) => oversize.set(absPath, sizeBytes),
       emitQuitRequest: () => quitSubs.forEach((cb) => cb()),
       quitConfirms,
+      notifies,
     },
   }
 }
