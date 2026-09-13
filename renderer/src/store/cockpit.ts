@@ -8,8 +8,21 @@
 
 import { createStore, type StoreApi } from 'zustand/vanilla'
 import type { Host } from '@shared/host'
-import type { HiddenMode, ProjectState, SplitLayout, TabId, ThemeName } from '@shared/types'
-import { cycleHiddenMode, defaultAppState, defaultProjectState, SCHEMA_VERSION } from '@shared/types'
+import type {
+  AgentStatusConfig,
+  HiddenMode,
+  ProjectState,
+  SplitLayout,
+  TabId,
+  ThemeName,
+} from '@shared/types'
+import {
+  cycleHiddenMode,
+  defaultAgentStatusConfig,
+  defaultAppState,
+  defaultProjectState,
+  SCHEMA_VERSION,
+} from '@shared/types'
 import type { AgentState } from '@shared/agentStatus/types'
 import { shouldNotifyBlocked } from '@shared/agentStatus/detect'
 import { basename } from '@shared/paths'
@@ -75,8 +88,12 @@ export interface CockpitState {
 
   /** Runtime-only shell status (set by terminal wiring; never persisted). */
   markShellExited(id: TabId): void
+  /** Agent status detection prefs (R2.1). */
+  agentStatus: AgentStatusConfig
   /** Set a Tab's detected Claude state; notifies on a background→blocked transition (R2.1). */
   setAgentState(id: TabId, state: AgentState): void
+  /** Update agent-status prefs (persisted). */
+  setAgentStatusConfig(patch: Partial<AgentStatusConfig>): void
   clearShellExited(id: TabId): void
 
   /** Close-confirm flow (ADR-0004 + close-confirm mockup). The caller supplies
@@ -159,13 +176,14 @@ export function createCockpitStore(deps: { host: Host }): StoreApi<CockpitState>
         '::app',
         setTimeout(() => {
           timers.delete('::app')
-          const { theme, lastProjectPath, dontAskCloseTab, dontAskQuit } = get()
+          const { theme, lastProjectPath, dontAskCloseTab, dontAskQuit, agentStatus } = get()
           void host.state.saveApp({
             schemaVersion: SCHEMA_VERSION,
             theme,
             lastProjectPath,
             dontAskCloseTab,
             dontAskQuit,
+            agentStatus,
           })
         }, SAVE_DEBOUNCE_MS),
       )
@@ -186,6 +204,7 @@ export function createCockpitStore(deps: { host: Host }): StoreApi<CockpitState>
       dontAskCloseTab: false,
       dontAskQuit: false,
       lastProjectPath: null,
+      agentStatus: { ...defaultAgentStatusConfig },
 
       async openTab(projectPath: string): Promise<TabId> {
         const already = get().tabs.find((t) => t.projectPath === projectPath)
@@ -381,15 +400,20 @@ export function createCockpitStore(deps: { host: Host }): StoreApi<CockpitState>
       },
 
       setAgentState(id: TabId, state: AgentState): void {
-        const { tabs, activeTabId } = get()
+        const { tabs, activeTabId, agentStatus } = get()
         const tab = tabs.find((t) => t.id === id)
         if (!tab || tab.agentState === state) return
         // Notify BEFORE committing, so we compare against the previous state.
-        if (shouldNotifyBlocked(tab.agentState, state, id === activeTabId)) {
+        if (agentStatus.notifyOnBlocked && shouldNotifyBlocked(tab.agentState, state, id === activeTabId)) {
           host.notify?.({ title: 'Claude needs you', body: tab.name, tabId: id })
         }
         // Runtime-only — bypass updateTab so no persistence is scheduled.
         set({ tabs: get().tabs.map((t) => (t.id === id ? { ...t, agentState: state } : t)) })
+      },
+
+      setAgentStatusConfig(patch: Partial<AgentStatusConfig>): void {
+        set({ agentStatus: { ...get().agentStatus, ...patch } })
+        scheduleAppSave()
       },
 
       clearShellExited(id: TabId): void {
@@ -412,6 +436,7 @@ export function createCockpitStore(deps: { host: Host }): StoreApi<CockpitState>
                 dontAskCloseTab: app.dontAskCloseTab ?? false,
                 dontAskQuit: app.dontAskQuit ?? false,
                 lastProjectPath: app.lastProjectPath,
+                agentStatus: { ...defaultAgentStatusConfig, ...app.agentStatus },
               })
             }
             hydrating = false

@@ -33,6 +33,13 @@ const bridge: PreloadBridge = {
     return () => ipcRenderer.removeListener(IPC.quitRequest, h)
   },
   confirmQuit: () => ipcRenderer.send(IPC.quitConfirm),
+  notify: (opts: { title: string; body: string; tabId: string }) =>
+    ipcRenderer.send(IPC.notify, opts),
+  onFocusTab: (cb: (tabId: string) => void) => {
+    const h = (_e: unknown, tabId: string): void => cb(tabId)
+    ipcRenderer.on(IPC.focusTab, h)
+    return () => ipcRenderer.removeListener(IPC.focusTab, h)
+  },
 
   watchStart: (absPath: string) => ipcRenderer.invoke(IPC.watchStart, absPath),
   watchStop: (watchId: number) => ipcRenderer.invoke(IPC.watchStop, watchId),

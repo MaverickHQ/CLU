@@ -34,6 +34,8 @@ function createMockBridge() {
     pickDirectory: vi.fn(async () => null),
     onQuitRequest: vi.fn(() => () => {}),
     confirmQuit: vi.fn(),
+    notify: vi.fn(),
+    onFocusTab: vi.fn(() => () => {}),
     watchStart: vi.fn(async () => 7),
     watchStop: vi.fn(async (id: number) => {
       watchStops.push(id)

@@ -20,6 +20,8 @@ export const IPC = {
   pickDirectory: 'clu:dialog:pick-directory',
   quitRequest: 'clu:app:quit-request', // main → renderer (push)
   quitConfirm: 'clu:app:quit-confirm',
+  notify: 'clu:app:notify', // renderer → main (R2.1k)
+  focusTab: 'clu:app:focus-tab', // main → renderer (push, on notification click)
   watchStart: 'clu:watch:start',
   watchStop: 'clu:watch:stop',
   watchEvent: 'clu:watch:event', // main → renderer (push)
@@ -51,6 +53,8 @@ export interface PreloadBridge {
   pickDirectory(): Promise<string | null>
   onQuitRequest(cb: () => void): () => void
   confirmQuit(): void
+  notify(opts: { title: string; body: string; tabId: string }): void
+  onFocusTab(cb: (tabId: string) => void): () => void
 
   watchStart(absPath: string): Promise<number>
   watchStop(watchId: number): Promise<void>

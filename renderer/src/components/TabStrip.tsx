@@ -28,6 +28,14 @@ export function TabStrip(): React.JSX.Element {
           className={tab.id === activeTabId ? 'tab active' : 'tab'}
           onClick={() => selectTab(tab.id)}
         >
+          {tab.agentState && tab.agentState !== 'unknown' && (
+            <span
+              className={`tab-status tab-status-${tab.agentState}`}
+              data-testid={`tab-status-${tab.id}`}
+              aria-label={`Claude ${tab.agentState}`}
+              title={`Claude ${tab.agentState}`}
+            />
+          )}
           <Icon name="i-folder" className="icon icon-sm" />
           <span>{tab.name}</span>
           <span

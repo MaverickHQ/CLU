@@ -7,9 +7,13 @@ import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import '@xterm/xterm/css/xterm.css'
 import { useCockpit, useSessions } from '../store/context'
+import { buildSample, createAgentTracker } from '../terminal/agentStatus'
 import { Icon } from './Icons'
 
 const TERMINAL_FONT = "'JetBrains Mono', 'SF Mono', 'Menlo', 'Consolas', monospace"
+
+/** How often each Tab's terminal is sampled for agent state (R2.1i). */
+const SAMPLE_INTERVAL_MS = 400
 
 export function TerminalView(props: {
   tabId: string
@@ -23,6 +27,10 @@ export function TerminalView(props: {
   )
   const clearShellExited = useCockpit((s) => s.clearShellExited)
   const closeTab = useCockpit((s) => s.closeTab)
+  const setAgentState = useCockpit((s) => s.setAgentState)
+  const detectionEnabled = useCockpit((s) => s.agentStatus.enabled)
+  const enabledRef = useRef(detectionEnabled)
+  enabledRef.current = detectionEnabled // read live inside the poll interval
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -51,18 +59,38 @@ export function TerminalView(props: {
     }
     safeFit()
 
-    const offData = sessions.onData(tabId, (data) => term.write(data))
+    // Agent status detection (R2.1i): track PTY activity + OSC title, then
+    // sample the rendered buffer on a throttle and push committed state to the
+    // store. Runs for hidden Tabs too — that's the point (background status).
+    let lastDataAt = Date.now()
+    let oscTitle: string | null = null
+    const tracker = createAgentTracker()
+    const offData = sessions.onData(tabId, (data) => {
+      lastDataAt = Date.now()
+      term.write(data)
+    })
+    const offTitle = term.onTitleChange((t) => {
+      oscTitle = t
+    })
+    const poll = setInterval(() => {
+      if (!enabledRef.current) return
+      const sample = buildSample(term, oscTitle, Date.now() - lastDataAt)
+      setAgentState(tabId, tracker.feed(sample))
+    }, SAMPLE_INTERVAL_MS)
+
     const offKeys = term.onData((data) => sessions.write(tabId, data))
     const onWindowResize = (): void => safeFit()
     window.addEventListener('resize', onWindowResize)
 
     return () => {
       window.removeEventListener('resize', onWindowResize)
+      clearInterval(poll)
       offData()
+      offTitle.dispose()
       offKeys.dispose()
       term.dispose() // the PTY itself survives — sessions owns it
     }
-  }, [sessions, tabId, projectPath])
+  }, [sessions, tabId, projectPath, setAgentState])
 
   // Refit when this terminal becomes visible (hidden panes measure as 0×0).
   useEffect(() => {

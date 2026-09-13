@@ -134,6 +134,12 @@ pnpm e2e        # Playwright smoke suite (launches Electron)
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Acknowledgements
+
+Agent status detection (per-Tab working / blocked / idle) adapts the
+terminal-tail state-detection approach and Claude output patterns from
+[herdr](https://github.com/herdrdev/herdr) (Apache-2.0).
+
 ## License
 
 [MIT](LICENSE)

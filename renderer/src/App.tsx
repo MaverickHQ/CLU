@@ -9,7 +9,7 @@ import { createBrowserHost } from './host/browserHost'
 import { createElectronHost, isElectron } from './host/electronHost'
 import { wireEnvExport, wirePinStaleness } from './pins/wire'
 import { createTerminalSessions } from './terminal/sessions'
-import { wireQuit, wireTerminals } from './terminal/wire'
+import { wireFocusTab, wireQuit, wireTerminals } from './terminal/wire'
 import { Cockpit } from './components/Cockpit'
 import { IconSprite } from './components/Icons'
 import { installTestHook } from './testHook'
@@ -21,6 +21,7 @@ export function App(): React.JSX.Element {
     const sessions = createTerminalSessions({ host })
     wireTerminals(store, sessions)
     wireQuit(store, sessions, host)
+    wireFocusTab(store, host)
     wireEnvExport(store, host)
     wirePinStaleness(store, host)
     // e2e/devtools hook — dev + e2e builds only, never production (S3).

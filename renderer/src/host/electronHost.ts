@@ -59,6 +59,8 @@ export function createElectronHost(bridge: PreloadBridge): Host {
     writeEnvFile: (p, exp) => bridge.writeEnvFile(p, exp),
     onQuitRequest: (cb) => bridge.onQuitRequest(cb),
     confirmQuit: () => bridge.confirmQuit(),
+    notify: (opts) => bridge.notify(opts),
+    onFocusTab: (cb) => bridge.onFocusTab(cb),
 
     watchDir(absPath: string, onEvents: (events: FsEvent[]) => void): Unsubscribe {
       let watchId: number | null = null

@@ -291,6 +291,41 @@ body {
   opacity: 1;
   background: var(--bg-hover);
 }
+
+/* Agent status dot (R2.1j): per-Tab Claude state at a glance. */
+.tab-status {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--text-muted);
+}
+.tab-status-idle {
+  background: var(--text-muted);
+  opacity: 0.5;
+}
+.tab-status-working {
+  background: var(--accent, #4a9eff);
+  animation: clu-pulse 1.2s ease-in-out infinite;
+}
+.tab-status-blocked {
+  background: var(--git-modified, #e0af68);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--git-modified, #e0af68) 30%, transparent);
+}
+@keyframes clu-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tab-status-working {
+    animation: none;
+  }
+}
 .tab-new {
   display: flex;
   align-items: center;

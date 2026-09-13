@@ -79,6 +79,8 @@ export interface Host {
   /** Raise a desktop notification (e.g. a background Tab's Claude is blocked).
    *  `tabId` lets the click focus that Tab. Optional: browser/fake may omit. */
   notify?(opts: { title: string; body: string; tabId: TabId }): void
+  /** Main asks the renderer to focus a Tab (notification click). Optional. */
+  onFocusTab?(cb: (tabId: TabId) => void): Unsubscribe
 
   // --- git
   /** Raw `git status --porcelain` output plus the repo→project path prefix, or

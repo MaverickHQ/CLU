@@ -6,6 +6,12 @@ import type { Host } from '@shared/host'
 import type { CockpitState } from '../store/cockpit'
 import type { TerminalSessions } from './sessions'
 
+/** Notification click → focus the referenced Tab (R2.1k). */
+export function wireFocusTab(store: StoreApi<CockpitState>, host: Host): () => void {
+  if (!host.onFocusTab) return () => {}
+  return host.onFocusTab((tabId) => store.getState().selectTab(tabId))
+}
+
 /** Quit handshake: main asks → store decides (confirm dialog vs immediate). */
 export function wireQuit(
   store: StoreApi<CockpitState>,

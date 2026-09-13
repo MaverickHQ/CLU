@@ -197,5 +197,22 @@ describe('cockpit store', () => {
       store.getState().setAgentState(a, 'blocked') // repeat sample
       expect(host.fake.notifies).toHaveLength(1)
     })
+
+    it('honors notifyOnBlocked=false (no notification)', async () => {
+      const { host, store } = setup()
+      store.getState().setAgentStatusConfig({ notifyOnBlocked: false })
+      const a = await store.getState().openTab('/proj/a')
+      await store.getState().openTab('/proj/b')
+      store.getState().setAgentState(a, 'blocked')
+      expect(host.fake.notifies).toHaveLength(0)
+    })
+
+    it('setAgentStatusConfig persists via a debounced app save', async () => {
+      const { host, store } = setup()
+      store.getState().setAgentStatusConfig({ sound: true })
+      await vi.advanceTimersByTimeAsync(SAVE_DEBOUNCE_MS + 10)
+      const app = await host.state.loadApp()
+      expect(app?.agentStatus).toMatchObject({ sound: true })
+    })
   })
 })

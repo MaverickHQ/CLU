@@ -44,6 +44,22 @@ export interface ProjectState {
  * last-opened Project (restored on launch; a global multi-project index is
  * out of scope for v1).
  */
+/** Agent status detection prefs (R2.1 / ADR-0011). */
+export interface AgentStatusConfig {
+  /** Run detection at all (per-Tab dots). */
+  enabled: boolean
+  /** OS notification when a background Tab becomes blocked. */
+  notifyOnBlocked: boolean
+  /** Play a sound with the notification. */
+  sound: boolean
+}
+
+export const defaultAgentStatusConfig: AgentStatusConfig = {
+  enabled: true,
+  notifyOnBlocked: true,
+  sound: false,
+}
+
 export interface AppState {
   schemaVersion: number
   theme: ThemeName
@@ -51,6 +67,8 @@ export interface AppState {
   /** Close-confirm "don't ask again" prefs (per-action, close-confirm mockup). */
   dontAskCloseTab?: boolean
   dontAskQuit?: boolean
+  /** Agent status detection prefs (R2.1). */
+  agentStatus?: AgentStatusConfig
 }
 
 export const SCHEMA_VERSION = 1
@@ -68,5 +86,10 @@ export function defaultProjectState(name: string): ProjectState {
 }
 
 export function defaultAppState(): AppState {
-  return { schemaVersion: SCHEMA_VERSION, theme: 'kiro-dark', lastProjectPath: null }
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    theme: 'kiro-dark',
+    lastProjectPath: null,
+    agentStatus: { ...defaultAgentStatusConfig },
+  }
 }

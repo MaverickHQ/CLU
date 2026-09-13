@@ -6,7 +6,7 @@
 // project at <root>/.clu/state.json (ADR-0001 — state travels with the repo);
 // only app-level prefs live under userData.
 
-import { app, BrowserWindow, dialog, ipcMain } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, Notification } from 'electron'
 import { execFile } from 'node:child_process'
 import {
   access,
@@ -301,6 +301,21 @@ export function registerHostIpc(getWindow: () => BrowserWindow | null): () => vo
     pty.resize(id, cols, rows),
   )
   ipcMain.on(IPC.ptyKill, (_e, id: string) => pty.kill(id))
+
+  // OS notification (R2.1k): a background Tab's Claude is blocked. Clicking it
+  // focuses the window and tells the renderer which Tab to select.
+  ipcMain.on(IPC.notify, (_e, opts: { title: string; body: string; tabId: string }) => {
+    if (!Notification.isSupported()) return
+    const n = new Notification({ title: opts.title, body: opts.body })
+    n.on('click', () => {
+      const win = getWindow()
+      if (!win || win.isDestroyed()) return
+      if (win.isMinimized()) win.restore()
+      win.focus()
+      if (!win.webContents.isDestroyed()) win.webContents.send(IPC.focusTab, opts.tabId)
+    })
+    n.show()
+  })
 
   // Teardown on app quit / window close (C6): kill every PTY and close every
   // watcher so no shell or fs watcher is orphaned. Idempotent.
