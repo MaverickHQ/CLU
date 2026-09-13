@@ -20,6 +20,7 @@ export default defineConfig({
           environment: 'node',
           include: [
             '{main,preload,shared}/**/*.test.{ts,tsx}',
+            'renderer/src/*.test.ts', // top-level pure renderer tests (e.g. testHook)
             'renderer/**/store/**/*.test.ts',
             'renderer/**/host/**/*.test.ts',
             'renderer/**/terminal/**/*.test.ts',
