@@ -76,7 +76,7 @@ describe('classify — idle vs unknown', () => {
     )
   })
   it('a plain shell prompt is unknown, not idle', () => {
-    expect(state(sample(['maverick@mac clu %']))).toBe('unknown')
+    expect(state(sample(['dev@host app %']))).toBe('unknown')
   })
   it('another program (vim) is unknown', () => {
     expect(state(sample(['~', '~', '-- INSERT --']))).toBe('unknown')
@@ -97,7 +97,7 @@ describe('classify — PTY-activity arbitration', () => {
     expect(state(sample(idle, { msSinceData: ACTIVE_WINDOW_MS + 1 }))).toBe('idle')
   })
   it('unknown + live output stays unknown (shell output is not "working")', () => {
-    expect(state(sample(['maverick@mac clu %'], { msSinceData: 10 }))).toBe('unknown')
+    expect(state(sample(['dev@host app %'], { msSinceData: 10 }))).toBe('unknown')
   })
 })
 
