@@ -77,4 +77,20 @@ describe('chokidar dir watcher (real fs)', () => {
     expect(events.some((e) => e.path.includes('node_modules'))).toBe(false)
     stop()
   }, 15000)
+
+  it('(fd-safety) does not watch beyond the depth cap (huge/deep trees)', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'clu-watch-'))
+    const deep = join(dir, 'a', 'b', 'c', 'd', 'e', 'f') // well beyond WATCH_MAX_DEPTH
+    mkdirSync(deep, { recursive: true })
+    const events: FsEvent[] = []
+    const stop = await watchReady(dir, events)
+
+    writeFileSync(join(deep, 'deep.txt'), '1') // beyond the cap → must NOT fire
+    writeFileSync(join(dir, 'a', 'near.txt'), '1') // shallow → fires
+    await waitFor(() => events.some((e) => e.path.endsWith('near.txt')))
+    await new Promise((r) => setTimeout(r, 200)) // grace for any stray deep emit
+
+    expect(events.some((e) => e.path.endsWith('deep.txt'))).toBe(false)
+    stop()
+  }, 15000)
 })
