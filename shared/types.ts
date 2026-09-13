@@ -60,6 +60,23 @@ export const defaultAgentStatusConfig: AgentStatusConfig = {
   sound: false,
 }
 
+/** Claude session resume prefs (R2.2 / ADR-0012). */
+export interface SessionResumeConfig {
+  /** Capture the session on close and offer resume on reopen. */
+  enabled: boolean
+}
+
+export const defaultSessionResumeConfig: SessionResumeConfig = {
+  enabled: true,
+}
+
+/** A project's last Claude session, snapshotted at Tab close (R2.2). Keyed by
+ *  projectPath in AppState.resumeCandidates. */
+export interface ResumeCandidate {
+  sessionId: string
+  capturedAt: number
+}
+
 export interface AppState {
   schemaVersion: number
   theme: ThemeName
@@ -69,6 +86,11 @@ export interface AppState {
   dontAskQuit?: boolean
   /** Agent status detection prefs (R2.1). */
   agentStatus?: AgentStatusConfig
+  /** Claude session resume prefs (R2.2). */
+  sessionResume?: SessionResumeConfig
+  /** Per-project last-session snapshots for resume-on-reopen (R2.2), keyed by
+   *  projectPath. Added optionally (no schema bump) — mirrors agentStatus. */
+  resumeCandidates?: Record<string, ResumeCandidate>
 }
 
 export const SCHEMA_VERSION = 1
@@ -91,5 +113,7 @@ export function defaultAppState(): AppState {
     theme: 'kiro-dark',
     lastProjectPath: null,
     agentStatus: { ...defaultAgentStatusConfig },
+    sessionResume: { ...defaultSessionResumeConfig },
+    resumeCandidates: {},
   }
 }

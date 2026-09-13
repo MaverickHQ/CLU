@@ -3,7 +3,7 @@
 // agree; the renderer's electronHost wraps the bridge into the full Host.
 
 import type { AppState, ProjectState } from './types'
-import type { GitStatus } from './host'
+import type { GitStatus, SessionFile } from './host'
 
 export const IPC = {
   stateSaveProject: 'clu:state:save-project',
@@ -22,6 +22,7 @@ export const IPC = {
   quitConfirm: 'clu:app:quit-confirm',
   notify: 'clu:app:notify', // renderer → main (R2.1k)
   focusTab: 'clu:app:focus-tab', // main → renderer (push, on notification click)
+  listSessions: 'clu:session:list', // renderer → main (R2.2 / ADR-0012)
   watchStart: 'clu:watch:start',
   watchStop: 'clu:watch:stop',
   watchEvent: 'clu:watch:event', // main → renderer (push)
@@ -55,6 +56,7 @@ export interface PreloadBridge {
   confirmQuit(): void
   notify(opts: { title: string; body: string; tabId: string }): void
   onFocusTab(cb: (tabId: string) => void): () => void
+  listSessions(cwd: string): Promise<SessionFile[]>
 
   watchStart(absPath: string): Promise<number>
   watchStop(watchId: number): Promise<void>

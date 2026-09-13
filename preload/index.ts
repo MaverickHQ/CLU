@@ -35,6 +35,7 @@ const bridge: PreloadBridge = {
   confirmQuit: () => ipcRenderer.send(IPC.quitConfirm),
   notify: (opts: { title: string; body: string; tabId: string }) =>
     ipcRenderer.send(IPC.notify, opts),
+  listSessions: (cwd: string) => ipcRenderer.invoke(IPC.listSessions, cwd),
   onFocusTab: (cb: (tabId: string) => void) => {
     const h = (_e: unknown, tabId: string): void => cb(tabId)
     ipcRenderer.on(IPC.focusTab, h)

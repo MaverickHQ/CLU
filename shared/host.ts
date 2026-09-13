@@ -34,6 +34,14 @@ export interface GitStatus {
   prefix: string
 }
 
+/** One saved Claude session for a project (R2.2 / ADR-0012). `id` is the
+ *  transcript filename minus `.jsonl` (a UUID); `mtimeMs` is its last-modified
+ *  time, used to pick the session touched during a Tab's lifetime. */
+export interface SessionFile {
+  id: string
+  mtimeMs: number
+}
+
 export type Unsubscribe = () => void
 
 export interface SpawnPtyOptions {
@@ -81,6 +89,13 @@ export interface Host {
   notify?(opts: { title: string; body: string; tabId: TabId }): void
   /** Main asks the renderer to focus a Tab (notification click). Optional. */
   onFocusTab?(cb: (tabId: TabId) => void): Unsubscribe
+
+  // --- Claude session resume (R2.2 / ADR-0012; Electron-only)
+  /** Every saved Claude session for a project cwd (reads
+   *  ~/.claude/projects/<slug>/*.jsonl — filenames + mtimes only, never
+   *  contents). Returns [] when none/unreadable. Optional: browser/fake may
+   *  omit, in which case resume is simply unavailable. */
+  listSessions?(cwd: string): Promise<SessionFile[]>
 
   // --- git
   /** Raw `git status --porcelain` output plus the repo→project path prefix, or

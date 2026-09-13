@@ -19,14 +19,15 @@ import {
   stat,
   writeFile,
 } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
+import { homedir, tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { promisify } from 'node:util'
 import { IPC } from '@shared/ipc'
 import { fallbackEnvCommand, renderPosixEnv, type EnvExport } from '@shared/envFile'
 import { envFilePath, stateFilePath } from '@shared/paths'
 import { createQuietEmitter, type QuietEmitter } from '@shared/quietEmitter'
-import { READ_HARD_MAX, type GitStatus } from '@shared/host'
+import { READ_HARD_MAX, type GitStatus, type SessionFile } from '@shared/host'
+import { projectSlug } from '@shared/session/paths'
 import {
   isCleanProjectPath,
   isWithinRoots,
@@ -208,6 +209,33 @@ export function registerHostIpc(getWindow: () => BrowserWindow | null): () => vo
       return { porcelain: status.stdout, prefix: prefix.stdout.trim() }
     } catch {
       return null // not a repo, or git missing — graceful degradation
+    }
+  })
+
+  // R2.2 / ADR-0012: enumerate a project's saved Claude sessions. Reads only
+  // the transcript-dir filenames + mtimes under ~/.claude/projects/<slug>/,
+  // never contents. Not root-confined (it's under $HOME, not the project) — but
+  // it's read-only listing of Claude Code's own dir, and returns [] on any error
+  // (dir absent, unreadable) so resume simply degrades to unavailable.
+  ipcMain.handle(IPC.listSessions, async (_e, cwd: string): Promise<SessionFile[]> => {
+    try {
+      const dir = join(homedir(), '.claude', 'projects', projectSlug(cwd))
+      const names = await readdir(dir)
+      const files = await Promise.all(
+        names
+          .filter((n) => n.endsWith('.jsonl'))
+          .map(async (n): Promise<SessionFile | null> => {
+            try {
+              const s = await stat(join(dir, n))
+              return { id: n.slice(0, -'.jsonl'.length), mtimeMs: s.mtimeMs }
+            } catch {
+              return null // vanished between readdir and stat
+            }
+          }),
+      )
+      return files.filter((f): f is SessionFile => f !== null)
+    } catch {
+      return [] // no transcript dir for this project — resume unavailable
     }
   })
 

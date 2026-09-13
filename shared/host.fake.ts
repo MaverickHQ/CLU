@@ -4,7 +4,7 @@
 
 import { renderPosixEnv } from './envFile'
 import { isIgnoredPath } from './ignores'
-import type { FsEvent, GitStatus, Host, SpawnPtyOptions, Unsubscribe } from './host'
+import type { FsEvent, GitStatus, Host, SessionFile, SpawnPtyOptions, Unsubscribe } from './host'
 import type { AppState, ProjectState, TabId } from './types'
 
 /** True when `child` is `dir` itself or sits directly/indirectly under it. */
@@ -46,6 +46,8 @@ export interface FakeHost extends Host {
     quitConfirms: number[]
     /** notify() calls, for asserting background→blocked notifications (R2.1). */
     notifies: Array<{ title: string; body: string; tabId: TabId }>
+    /** Seed the Claude sessions listSessions(cwd) returns (R2.2). */
+    setSessions(cwd: string, files: SessionFile[]): void
   }
 }
 
@@ -61,6 +63,7 @@ export function createFakeHost(): FakeHost {
   const quitSubs = new Set<() => void>()
   const quitConfirms: number[] = []
   const notifies: Array<{ title: string; body: string; tabId: TabId }> = []
+  const sessions = new Map<string, SessionFile[]>()
   const spawns: SpawnPtyOptions[] = []
   const writes: Array<{ id: TabId; data: string }> = []
   const kills: TabId[] = []
@@ -146,6 +149,9 @@ export function createFakeHost(): FakeHost {
     notify(opts) {
       notifies.push(opts)
     },
+    async listSessions(cwd) {
+      return sessions.get(cwd) ?? []
+    },
 
     async gitStatus(projectPath) {
       return gitStatuses.get(projectPath) ?? null
@@ -220,6 +226,7 @@ export function createFakeHost(): FakeHost {
       emitQuitRequest: () => quitSubs.forEach((cb) => cb()),
       quitConfirms,
       notifies,
+      setSessions: (cwd, files) => sessions.set(cwd, files),
     },
   }
 }

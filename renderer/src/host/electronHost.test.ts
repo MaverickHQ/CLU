@@ -36,6 +36,7 @@ function createMockBridge() {
     confirmQuit: vi.fn(),
     notify: vi.fn(),
     onFocusTab: vi.fn(() => () => {}),
+    listSessions: vi.fn(async () => []),
     watchStart: vi.fn(async () => 7),
     watchStop: vi.fn(async (id: number) => {
       watchStops.push(id)

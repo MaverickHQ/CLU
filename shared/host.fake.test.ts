@@ -106,6 +106,14 @@ describe('fake Host: CLU-specific surface', () => {
     expect((await host.gitStatus('/sub'))?.prefix).toBe('packages/app/')
   })
 
+  it('(R2.2) listSessions returns [] by default and seeded sessions per cwd', async () => {
+    const host = createFakeHost()
+    expect(await host.listSessions!('/p')).toEqual([])
+    host.fake.setSessions('/p', [{ id: 'a', mtimeMs: 1 }])
+    expect(await host.listSessions!('/p')).toEqual([{ id: 'a', mtimeMs: 1 }])
+    expect(await host.listSessions!('/other')).toEqual([])
+  })
+
   it('records PTY spawns/writes/kills and routes emitted data per id', () => {
     const host = createFakeHost()
     const a = host.spawnPty({ cwd: '/p', cols: 80, rows: 24 })

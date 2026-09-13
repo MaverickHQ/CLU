@@ -9,6 +9,7 @@ import '@xterm/xterm/css/xterm.css'
 import { useCockpit, useSessions } from '../store/context'
 import { buildSample, createAgentTracker } from '../terminal/agentStatus'
 import { Icon } from './Icons'
+import { ResumeBanner } from './ResumeBanner'
 
 const TERMINAL_FONT = "'JetBrains Mono', 'SF Mono', 'Menlo', 'Consolas', monospace"
 
@@ -108,6 +109,7 @@ export function TerminalView(props: {
 
   return (
     <div className="terminal-view" style={{ display: visible ? 'block' : 'none', height: '100%' }}>
+      <ResumeBanner tabId={tabId} projectPath={projectPath} />
       <div ref={containerRef} data-testid={`xterm-${tabId}`} style={{ height: '100%' }} />
       {shellExited && (
         <div className="shell-exited-overlay" data-testid="shell-exited">

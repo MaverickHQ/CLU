@@ -12,6 +12,8 @@ import type {
   AgentStatusConfig,
   HiddenMode,
   ProjectState,
+  ResumeCandidate,
+  SessionResumeConfig,
   SplitLayout,
   TabId,
   ThemeName,
@@ -21,10 +23,12 @@ import {
   defaultAgentStatusConfig,
   defaultAppState,
   defaultProjectState,
+  defaultSessionResumeConfig,
   SCHEMA_VERSION,
 } from '@shared/types'
 import type { AgentState } from '@shared/agentStatus/types'
 import { shouldNotifyBlocked } from '@shared/agentStatus/detect'
+import { pickLatestSession, sessionExists } from '@shared/session/pick'
 import { basename } from '@shared/paths'
 
 export const SAVE_DEBOUNCE_MS = 200
@@ -50,6 +54,12 @@ export interface TabRuntime {
   stalePins?: string[]
   /** Runtime-only: detected Claude session state (R2.1 / ADR-0011). */
   agentState?: AgentState
+  /** Runtime-only: when this Tab opened (ms). Bounds the resume-capture mtime
+   *  window so close only snapshots a session touched during this Tab (R2.2). */
+  openedAt?: number
+  /** Runtime-only: a resumable Claude session id to offer on reopen (R2.2). The
+   *  terminal-pane banner shows when set; cleared on run/dismiss. Not persisted. */
+  resumeAvailable?: string
 }
 
 /** A close/quit awaiting user confirmation (close-confirm mockup). */
@@ -95,6 +105,15 @@ export interface CockpitState {
   /** Update agent-status prefs (persisted). */
   setAgentStatusConfig(patch: Partial<AgentStatusConfig>): void
   clearShellExited(id: TabId): void
+
+  /** Claude session resume prefs (R2.2 / ADR-0012). */
+  sessionResume: SessionResumeConfig
+  /** Per-project last-session snapshots for resume-on-reopen (R2.2). */
+  resumeCandidates: Record<string, ResumeCandidate>
+  /** Update session-resume prefs (persisted). */
+  setSessionResumeConfig(patch: Partial<SessionResumeConfig>): void
+  /** Clear a Tab's resume offer (after the user runs or dismisses it) (R2.2). */
+  clearResumeAvailable(id: TabId): void
 
   /** Close-confirm flow (ADR-0004 + close-confirm mockup). The caller supplies
    *  whether a live PTY exists — the store stays decoupled from sessions. */
@@ -176,7 +195,15 @@ export function createCockpitStore(deps: { host: Host }): StoreApi<CockpitState>
         '::app',
         setTimeout(() => {
           timers.delete('::app')
-          const { theme, lastProjectPath, dontAskCloseTab, dontAskQuit, agentStatus } = get()
+          const {
+            theme,
+            lastProjectPath,
+            dontAskCloseTab,
+            dontAskQuit,
+            agentStatus,
+            sessionResume,
+            resumeCandidates,
+          } = get()
           void host.state.saveApp({
             schemaVersion: SCHEMA_VERSION,
             theme,
@@ -184,6 +211,8 @@ export function createCockpitStore(deps: { host: Host }): StoreApi<CockpitState>
             dontAskCloseTab,
             dontAskQuit,
             agentStatus,
+            sessionResume,
+            resumeCandidates,
           })
         }, SAVE_DEBOUNCE_MS),
       )
@@ -196,6 +225,51 @@ export function createCockpitStore(deps: { host: Host }): StoreApi<CockpitState>
       scheduleProjectSave(tab.projectPath)
     }
 
+    /** R2.2: on close, snapshot the newest Claude session touched during this
+     *  Tab's lifetime into resumeCandidates[projectPath], so a later reopen can
+     *  offer to resume exactly it. Best-effort: never throws, never blocks close. */
+    async function captureResumeCandidate(tab: TabRuntime): Promise<void> {
+      if (!get().sessionResume.enabled || !host.listSessions) return
+      try {
+        const files = await host.listSessions(tab.projectPath)
+        const id = pickLatestSession(files, tab.openedAt)
+        if (!id) return
+        set({
+          resumeCandidates: {
+            ...get().resumeCandidates,
+            [tab.projectPath]: { sessionId: id, capturedAt: Date.now() },
+          },
+        })
+        scheduleAppSave()
+      } catch {
+        // listing failed (no dir, unreadable) — resume simply stays unavailable
+      }
+    }
+
+    /** R2.2: on open, surface the project's captured session as a resume offer
+     *  iff it still exists on disk; otherwise drop the stale candidate. */
+    async function refreshResumeOffer(tabId: TabId, projectPath: string): Promise<void> {
+      if (!get().sessionResume.enabled || !host.listSessions) return
+      const cand = get().resumeCandidates[projectPath]
+      if (!cand) return
+      try {
+        const files = await host.listSessions(projectPath)
+        if (sessionExists(files, cand.sessionId)) {
+          set({
+            tabs: get().tabs.map((t) =>
+              t.id === tabId ? { ...t, resumeAvailable: cand.sessionId } : t,
+            ),
+          })
+        } else {
+          const { [projectPath]: _gone, ...rest } = get().resumeCandidates
+          set({ resumeCandidates: rest })
+          scheduleAppSave()
+        }
+      } catch {
+        // listing failed — leave the candidate, just don't offer this time
+      }
+    }
+
     return {
       tabs: [],
       activeTabId: null,
@@ -205,6 +279,8 @@ export function createCockpitStore(deps: { host: Host }): StoreApi<CockpitState>
       dontAskQuit: false,
       lastProjectPath: null,
       agentStatus: { ...defaultAgentStatusConfig },
+      sessionResume: { ...defaultSessionResumeConfig },
+      resumeCandidates: {},
 
       async openTab(projectPath: string): Promise<TabId> {
         const already = get().tabs.find((t) => t.projectPath === projectPath)
@@ -237,6 +313,7 @@ export function createCockpitStore(deps: { host: Host }): StoreApi<CockpitState>
             splits: { ...base.splits },
             gitignoreAnswered: base.gitignoreAnswered,
             missing: exists ? undefined : true,
+            openedAt: Date.now(),
           }
           set({
             tabs: [...get().tabs, tab],
@@ -244,6 +321,10 @@ export function createCockpitStore(deps: { host: Host }): StoreApi<CockpitState>
             lastProjectPath: exists ? projectPath : get().lastProjectPath,
           })
           scheduleAppSave()
+          // R2.2: if this project has a captured session that still exists on
+          // disk, offer to resume it. Fire-and-forget so it never delays the
+          // Tab appearing; degrades silently if listSessions is unavailable.
+          if (exists) void refreshResumeOffer(tab.id, projectPath)
           return tab.id
         })()
 
@@ -259,6 +340,8 @@ export function createCockpitStore(deps: { host: Host }): StoreApi<CockpitState>
         const { tabs, activeTabId } = get()
         const idx = tabs.findIndex((t) => t.id === id)
         if (idx < 0) return
+        // R2.2: snapshot the resumable session before the PTY dies (best-effort).
+        await captureResumeCandidate(tabs[idx])
         await flushProject(tabs[idx].projectPath)
         const remaining = tabs.filter((t) => t.id !== id)
         let nextActive = activeTabId
@@ -416,6 +499,16 @@ export function createCockpitStore(deps: { host: Host }): StoreApi<CockpitState>
         scheduleAppSave()
       },
 
+      setSessionResumeConfig(patch: Partial<SessionResumeConfig>): void {
+        set({ sessionResume: { ...get().sessionResume, ...patch } })
+        scheduleAppSave()
+      },
+
+      clearResumeAvailable(id: TabId): void {
+        // Runtime flag only — bypass updateTab so no persistence is scheduled.
+        set({ tabs: get().tabs.map((t) => (t.id === id ? { ...t, resumeAvailable: undefined } : t)) })
+      },
+
       clearShellExited(id: TabId): void {
         set({ tabs: get().tabs.map((t) => (t.id === id ? { ...t, shellExited: false } : t)) })
       },
@@ -437,6 +530,8 @@ export function createCockpitStore(deps: { host: Host }): StoreApi<CockpitState>
                 dontAskQuit: app.dontAskQuit ?? false,
                 lastProjectPath: app.lastProjectPath,
                 agentStatus: { ...defaultAgentStatusConfig, ...app.agentStatus },
+                sessionResume: { ...defaultSessionResumeConfig, ...app.sessionResume },
+                resumeCandidates: app.resumeCandidates ?? {},
               })
             }
             hydrating = false

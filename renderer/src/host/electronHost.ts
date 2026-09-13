@@ -61,6 +61,7 @@ export function createElectronHost(bridge: PreloadBridge): Host {
     confirmQuit: () => bridge.confirmQuit(),
     notify: (opts) => bridge.notify(opts),
     onFocusTab: (cb) => bridge.onFocusTab(cb),
+    listSessions: (cwd) => bridge.listSessions(cwd),
 
     watchDir(absPath: string, onEvents: (events: FsEvent[]) => void): Unsubscribe {
       let watchId: number | null = null

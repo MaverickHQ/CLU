@@ -696,6 +696,54 @@ body {
   color: var(--text-inverse);
 }
 
+/* ─── resume-session banner (R2.2 / ADR-0012) ─── */
+.resume-banner {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  right: var(--space-2);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-overlay);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+.resume-banner .icon {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.resume-banner .resume-text {
+  flex: 1;
+}
+.resume-banner .btn-primary {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  padding: 4px var(--space-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--text-inverse);
+}
+.resume-banner .resume-dismiss {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-md);
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 var(--space-1);
+}
+.resume-banner .resume-dismiss:hover {
+  color: var(--text-primary);
+}
+
 /* ─── modals (close-confirm mockup) ─── */
 .modal-backdrop {
   position: fixed;
