@@ -6,7 +6,7 @@ A file tree, a markdown/code viewer, and an embedded terminal running `claude` �
 
 ![CLU cockpit](docs/screenshots/cockpit.png)
 
-> **Status:** v1.0 (MVP). Cross-platform (macOS / Linux / Windows), distributed as **unsigned** GitHub Releases — built for me first, published for others on a best-effort basis.
+> **Status:** v1.1 — cross-platform (macOS / Linux / Windows), distributed as **unsigned** GitHub Releases. Built for my own workflow first, and shared in case it's useful to you.
 
 ---
 
@@ -18,6 +18,8 @@ CLU wraps a single Claude Code session with everything you need to drive it well
 - **Viewer** (top-right) — read-only markdown + syntax-highlighted source. Not an editor.
 - **Terminal** (bottom) — a real shell (xterm.js + node-pty) running `claude`, `vim`, `htop`, anything.
 - **Session tabs** — one tab per project, each with its own shell and pin set, restored on launch.
+- **Status at a glance** — every tab shows whether its Claude session is working, waiting on you, or idle. When a *background* tab gets blocked on a prompt, CLU sends a desktop notification — so with several projects open, you never have to hunt for the one that's stuck.
+- **Pick up where you left off** — reopen a project and resume its previous Claude conversation in one click (`claude --resume`), so closing a tab doesn't mean losing the thread.
 
 **The key idea — the pin set:** select files in the tree and press `Space` to *pin* them. Pinned files are exported into the shell as `$CLU_FILE` (the latest) and `$CLU_FILES` (all of them), so any command — especially `claude` — can act on exactly the files you care about:
 
@@ -43,22 +45,15 @@ CLU is **unsigned** (no Apple Developer Program, no notarization). Installs are 
 
 ### macOS
 
-Download `CLU-<version>-mac.zip` from the [Releases](https://github.com/maverickhq/clu/releases) page, unzip, move `CLU.app` to `/Applications`, then clear the quarantine flag:
+Download `CLU-<version>-mac.zip` from the [Releases](https://github.com/MaverickHQ/CLU/releases) page, unzip, move `CLU.app` to `/Applications`, then clear the quarantine flag:
 
 ```sh
 xattr -dr com.apple.quarantine /Applications/CLU.app
 ```
 
-Or via Homebrew:
-
-```sh
-brew tap maverickhq/clu
-brew install --cask clu
-```
-
 ### Linux
 
-Download the `.AppImage` from [Releases](https://github.com/maverickhq/clu/releases), make it executable, and run it:
+Download the `.AppImage` from [Releases](https://github.com/MaverickHQ/CLU/releases), make it executable, and run it:
 
 ```sh
 chmod +x CLU-<version>.AppImage
@@ -67,7 +62,7 @@ chmod +x CLU-<version>.AppImage
 
 ### Windows
 
-Download and run the portable `CLU-<version>.exe` from [Releases](https://github.com/maverickhq/clu/releases). Windows SmartScreen may warn on an unsigned binary — choose *More info → Run anyway*.
+Download and run the portable `CLU-<version>.exe` from [Releases](https://github.com/MaverickHQ/CLU/releases). Windows SmartScreen may warn on an unsigned binary — choose *More info → Run anyway*.
 
 Auto-update (via GitHub Releases) is built in and works for unsigned builds.
 
@@ -111,8 +106,8 @@ Pinned files update `$CLU_FILES` at the next shell prompt (via a shell-init hook
 Requires Node ≥ 20 and [pnpm](https://pnpm.io).
 
 ```sh
-git clone https://github.com/maverickhq/clu
-cd clu
+git clone https://github.com/MaverickHQ/CLU
+cd CLU
 pnpm install
 pnpm dev        # launch with hot-reload
 ```
