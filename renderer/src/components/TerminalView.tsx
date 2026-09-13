@@ -64,16 +64,25 @@ export function TerminalView(props: {
     // store. Runs for hidden Tabs too — that's the point (background status).
     let lastDataAt = Date.now()
     let oscTitle: string | null = null
+    let dirty = true // new output (or title) to classify since the last sample
     const tracker = createAgentTracker()
     const offData = sessions.onData(tabId, (data) => {
       lastDataAt = Date.now()
+      dirty = true
       term.write(data)
     })
     const offTitle = term.onTitleChange((t) => {
       oscTitle = t
+      dirty = true
     })
     const poll = setInterval(() => {
       if (!enabledRef.current) return
+      // Skip work when nothing changed AND we're already at rest — an idle or
+      // plain-shell Tab then costs nothing. Keep sampling while working/blocked
+      // so the settle-to-idle transition is still caught after output stops.
+      const resting = tracker.committed === 'idle' || tracker.committed === 'unknown'
+      if (!dirty && resting) return
+      dirty = false
       const sample = buildSample(term, oscTitle, Date.now() - lastDataAt)
       setAgentState(tabId, tracker.feed(sample))
     }, SAMPLE_INTERVAL_MS)

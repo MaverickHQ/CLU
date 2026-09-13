@@ -27,6 +27,7 @@ reference/
 /CLAUDE.md
 /docs/roadmap.md
 /docs/uat-checklist.md
+/docs/uat-smoke.js
 /docs/electron-cockpit-design.md
 /docs/electron-v1-design.md
 /docs/adr/0009-graphify-as-recognized-companion.md

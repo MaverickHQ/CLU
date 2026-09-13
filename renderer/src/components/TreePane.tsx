@@ -68,6 +68,14 @@ function PinnedSection(props: { tab: TabRuntime }): React.JSX.Element | null {
   )
 }
 
+// Per-Project loaded-directory cache (keyed by projectPath). TreePane is keyed
+// by the active Tab id, so switching Tabs unmounts/remounts it; without a cache
+// each switch reloads the tree from scratch and shows a blank pane until the
+// listDir IPC resolves. Seeding from this cache makes switching back instant;
+// loadDir still refreshes in the background. Module-level so it survives the
+// remount; bounded by the projects opened this session.
+const treeCache = new Map<string, Map<string, DirEntry[]>>()
+
 export function TreePane(props: { tab: TabRuntime }): React.JSX.Element {
   const { tab } = props
   const host = useHost()
@@ -87,15 +95,22 @@ export function TreePane(props: { tab: TabRuntime }): React.JSX.Element {
     async (dirPath: string): Promise<void> => {
       loadedDirs.current.add(dirPath)
       const entries = await host.listDir(dirPath)
-      setEntriesByDir((prev) => new Map(prev).set(dirPath, entries))
+      setEntriesByDir((prev) => {
+        const next = new Map(prev).set(dirPath, entries)
+        treeCache.set(tab.projectPath, next) // write-through so a re-mount is instant
+        return next
+      })
     },
-    [host],
+    [host, tab.projectPath],
   )
 
-  // Root + persisted-expanded dirs load on mount / tab change.
+  // Root + persisted-expanded dirs load on mount / tab change. Seed from the
+  // per-Project cache first so switching back shows the tree instantly (no
+  // blank), then refresh in the background.
   useEffect(() => {
-    loadedDirs.current = new Set()
-    setEntriesByDir(new Map())
+    const cached = treeCache.get(tab.projectPath)
+    setEntriesByDir(cached ?? new Map())
+    loadedDirs.current = new Set(cached?.keys())
     void loadDir(tab.projectPath)
     for (const dir of tab.treeExpansion) void loadDir(dir)
     void host.gitStatus(tab.projectPath).then((raw) => setGitMap(parsePorcelain(raw)))
