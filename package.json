@@ -1,7 +1,7 @@
 {
   "name": "clu",
   "productName": "CLU",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A focused desktop cockpit around a Claude Code CLI session: file tree, viewer, embedded terminal, per-project tabs, $CLU_FILES pin set.",
   "type": "module",
   "private": true,
