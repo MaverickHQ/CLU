@@ -24,12 +24,16 @@ export function App(): React.JSX.Element {
     wireFocusTab(store, host)
     wireEnvExport(store, host)
     wirePinStaleness(store, host)
-    // e2e/devtools hook — dev + e2e builds only, never production (S3).
-    installTestHook(window as unknown as Record<string, unknown>, store)
     return { host, store, sessions }
   })
 
   useEffect(() => {
+    // e2e/devtools hook — dev + e2e builds only, never production (S3).
+    // Installed HERE (not in the useState initializer) so it binds the store
+    // React actually mounted: StrictMode double-invokes the initializer, and
+    // installing there would leave window.__cluStore pointing at the discarded
+    // second store (empty tabs, never hydrated) — breaking devtools/e2e.
+    installTestHook(window as unknown as Record<string, unknown>, ctx.store)
     void ctx.store.getState().hydrate()
     const applyTheme = (theme: string) =>
       document.documentElement.setAttribute('data-theme', theme)
